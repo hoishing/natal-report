@@ -8,15 +8,17 @@ from natal_report import Report
 @pytest.fixture(scope="module")
 def report():
     person1 = {
-        "name": "Shing",
-        "city": "Hong Kong",
-        "dt": "1976-04-20 18:58",
+        "name": "shing",
+        "lat": 22.2783,
+        "lon": 114.175,
+        "utc_dt": "1976-04-20 09:58",
     }
 
     person2 = {
-        "name": "Belle",
-        "city": "Hong Kong",
-        "dt": "2011-01-23 08:44",
+        "name": "belle",
+        "lat": 22.2783,
+        "lon": 114.175,
+        "utc_dt": "2011-01-23 00:44",
     }
 
     orb = Orb(
@@ -29,14 +31,19 @@ def report():
 
     data1 = Data(**person1, config=Config(theme_type="light", orb=orb))
     data2 = Data(**person2)
-    return Report(data1, data2)
+    return Report(data1=data1, data2=data2)
 
 
 def test_basic_info(report):
     basic_info = report.basic_info
-    assert basic_info[0] == ("name", "Shing", "Belle")
-    assert basic_info[1] == ("city", "Hong Kong", "Hong Kong")
-    assert basic_info[2][0] == "birth"
+    assert basic_info[0] == ("name", "shing", "belle")
+    assert basic_info[1] == (
+        "coordinates",
+        "22.2783°N 114.175°E",
+        "22.2783°N 114.175°E",
+    )
+    assert basic_info[2][0] == "UTC birth time"
+    assert basic_info[2][1] == "1976-04-20 09:58", "2011-01-23 00:44"
 
 
 def test_element_vs_modality(report):

@@ -5,6 +5,7 @@
 try*
 ref/
 report.pdf
+*.bak
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

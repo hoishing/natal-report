@@ -1,10 +1,10 @@
 """
-This module generates a detailed astrological report in PDF format. 
-It includes information about birth data, elements, modalities, polarities, hemispheres, quadrants, signs, houses, and celestial bodies. 
-The report is created using the natal astrology library and rendered as an HTML document, which is then converted to a PDF.
+Module for generating detailed astrological reports in PDF format.
 
-Classes:
-    Report: Generates the astrological report.
+The module handles creation of astrological reports including birth data, elements,
+modalities, polarities, hemispheres, quadrants, signs, houses, and celestial bodies.
+The report is created using the natal astrology library and rendered as HTML, then
+converted to PDF.
 """
 
 from collections import defaultdict
@@ -40,21 +40,54 @@ class Report:
     """
     Generates an astrological report based on provided data.
 
-    Attributes:
+    Args:
         data1: The primary data for the report.
-        data2: The secondary data for the report, if any.
+        data2: The secondary data for the report.
     """
 
-    def __init__(self, data1: Data, data2: Data | None = None):
+    def __init__(
+        self,
+        data1: Data,
+        data2: Data | None = None,
+        city1: str | None = None,
+        city2: str | None = None,
+        tz1: str | None = None,
+        tz2: str | None = None,
+    ):
         """
-        Initializes the Report with the given data.
+        Initialize report with birth data.
 
         Args:
-            data1: The primary data for the report.
-            data2: The secondary data for the report, if any.
+            data1: Primary birth data for the report.
+            data2: Optional secondary birth data for comparison.
+            city1: City name for the primary birth data.
+            city2: City name for the secondary birth data.
+            tz1: Timezone for the primary birth data.
+            tz2: Timezone for the secondary birth data.
         """
         self.data1: Data = data1
-        self.data2: Data = data2
+        self.data2: Data | None = data2
+        self.city1: str | None = city1
+        self.city2: str | None = city2
+        self.tz1: str | None = tz1
+        self.tz2: str | None = tz2
+
+    @property
+    def basic_info_with_city(self) -> Grid:
+        """
+        Generate basic birth information including city and timezone.
+
+        Returns:
+            Grid containing name, city, and birth date/time for each person.
+        """
+        time_fmt = "%Y-%m-%d %H:%M"
+        dt1 = self.data1.utc_dt.astimezone(self.tz1).strftime(time_fmt)
+        output = [["name", "city", "birth"]]
+        output.append([self.data1.name, self.city1, dt1])
+        if self.data2:
+            dt2 = self.data2.utc_dt.astimezone(self.tz2).strftime(time_fmt)
+            output.append([self.data2.name, self.data2.city, dt2])
+        return list(zip(*output))
 
     @property
     def basic_info(self) -> Grid:
@@ -62,24 +95,26 @@ class Report:
         Generates basic information about the provided data.
 
         Returns:
-            A grid containing the name, city, and birth date/time.
+            Grid containing name, coordinates, and birth date/time.
         """
         time_fmt = "%Y-%m-%d %H:%M"
-        dt1 = self.data1.dt.strftime(time_fmt)
-        output = [["name", "city", "birth"]]
-        output.append([self.data1.name, self.data1.city, dt1])
+        dt1 = self.data1.utc_dt.strftime(time_fmt)
+        coordinates1 = f"{self.data1.lat}°N {self.data1.lon}°E"
+        output = [["name", "location", "UTC time"]]
+        output.append([self.data1.name, coordinates1, dt1])
         if self.data2:
-            dt2 = self.data2.dt.strftime(time_fmt)
-            output.append([self.data2.name, self.data2.city, dt2])
+            dt2 = self.data2.utc_dt.strftime(time_fmt)
+            coordinates2 = f"{self.data2.lat}°N {self.data2.lon}°E"
+            output.append([self.data2.name, coordinates2, dt2])
         return list(zip(*output))
 
     @property
     def element_vs_modality(self) -> Grid:
         """
-        Generates a grid comparing elements and modalities.
+        Generate a grid comparing elements and modalities.
 
         Returns:
-            A grid comparing elements and modalities.
+            Grid comparing elements and modalities.
         """
         aspectable1 = self.data1.aspectables
         element_symbols = [svg_of(ele.name) for ele in ELEMENTS]
@@ -119,10 +154,10 @@ class Report:
     @property
     def quadrants_vs_hemisphere(self) -> Grid:
         """
-        Generates a grid comparing quadrants and hemispheres.
+        Generate a grid comparing quadrants and hemispheres.
 
         Returns:
-            A grid comparing quadrants and hemispheres.
+            Grid comparing quadrants and hemispheres.
         """
         q = self.data1.quadrants
         first_q = [svg_of(body.name) for body in q[0]]
@@ -143,10 +178,10 @@ class Report:
     @property
     def signs(self) -> Grid:
         """
-        Generates a grid of signs and their corresponding bodies.
+        Generate a grid of signs and their corresponding bodies.
 
         Returns:
-            A grid of signs and their corresponding bodies
+            Grid of signs and their corresponding bodies.
         """
         grid = [["sign", "bodies", "sum"]]
         for sign in SIGN_MEMBERS:
@@ -161,10 +196,10 @@ class Report:
     @property
     def houses(self) -> Grid:
         """
-        Generates a grid of houses and their corresponding bodies.
+        Generate a grid of houses and their corresponding bodies.
 
         Returns:
-            A grid of houses and their corresponding bodies.
+            Grid of houses and their corresponding bodies.
         """
         grid = [["house", "cusp", "bodies", "sum"]]
         for hse in self.data1.houses:
@@ -186,32 +221,32 @@ class Report:
     @property
     def celestial_body1(self) -> Grid:
         """
-        Generates a grid of celestial bodies for the primary data.
+        Generate a grid of celestial bodies for the primary data.
 
         Returns:
-            Grid: A grid of celestial bodies for the primary data.
+            Grid of celestial bodies for the primary data.
         """
         return self.celestial_body(self.data1)
 
     @property
     def celestial_body2(self) -> Grid:
         """
-        Generates a grid of celestial bodies for the secondary data.
+        Generate a grid of celestial bodies for the secondary data.
 
         Returns:
-            Grid: A grid of celestial bodies for the secondary data.
+            Grid of celestial bodies for the secondary data.
         """
         return self.celestial_body(self.data2)
 
     def celestial_body(self, data: Data) -> Grid:
         """
-        Generates a grid of celestial bodies for the given data.
+        Generate a grid of celestial bodies for the given data.
 
         Args:
             data: The data for which to generate the grid.
 
         Returns:
-            A grid of celestial bodies for the given data.
+            Grid of celestial bodies for the given data.
         """
         grid = [("body", "sign", "house", "dignity")]
         for body in data.aspectables:
@@ -228,10 +263,10 @@ class Report:
     @property
     def cross_ref(self) -> StatData:
         """
-        Generates cross-reference statistics between the primary and secondary data.
+        Generate cross-reference statistics between primary and secondary data.
 
         Returns:
-            StatData: Cross-reference statistics between the primary and secondary data.
+            Cross-reference statistics between primary and secondary data.
         """
         stats = Stats(self.data1, self.data2)
         grid = stats.cross_ref.grid
@@ -250,13 +285,14 @@ class Report:
     @property
     def full_report(self) -> str:
         """
-        Generates the full astrological report as an HTML string.
+        Generate the full astrological report as an HTML string.
 
         Returns:
-            str: The full astrological report as an HTML string.
+            Full astrological report as an HTML string.
         """
         chart = Chart(self.data1, width=400, data2=self.data2)
         row1 = div(
+            # TODO: use basic_info_with_city when city is provided
             section("Birth Info", self.basic_info)
             + section("Elements, Modality & Polarity", self.element_vs_modality)
             + section("Hemisphere & Quadrants", self.quadrants_vs_hemisphere),
@@ -285,13 +321,13 @@ class Report:
 
     def create_pdf(self, html: str) -> BytesIO:
         """
-        Creates a PDF from the given HTML string.
+        Create a PDF from the given HTML string.
 
         Args:
             html: The HTML string to convert to PDF.
 
         Returns:
-            A BytesIO object containing the PDF data.
+            BytesIO object containing the PDF data.
         """
         fp = BytesIO()
         HTML(string=html).write_pdf(fp)
@@ -303,13 +339,13 @@ class Report:
 
 def html_table_of(grid: Grid) -> str:
     """
-    Converts a grid of data into an HTML table.
+    Convert a grid of data into an HTML table.
 
-    # Arguments
-    * grid - The grid of data to convert
+    Args:
+        grid: The grid of data to convert.
 
-    # Returns
-    String containing the HTML table
+    Returns:
+        HTML table as a string.
     """
     rows = []
     for row in grid:
@@ -324,14 +360,15 @@ def html_table_of(grid: Grid) -> str:
 
 
 def svg_of(name: str, scale: float = 0.5) -> str:
-    """Generates an SVG representation of a given symbol name.
+    """
+    Generate an SVG representation of a given symbol name.
 
     Args:
-        name: The name of the symbol
-        scale: The scale of the SVG
+        name: The name of the symbol.
+        scale: The scale of the SVG.
 
     Returns:
-        The SVG representation of the symbol
+        SVG representation of the symbol.
     """
     if not name:
         return ""
@@ -359,49 +396,16 @@ def svg_of(name: str, scale: float = 0.5) -> str:
 
 def section(title: str, grid: Grid) -> str:
     """
-    Creates an HTML section with a title and a table of data.
+    Create an HTML section with a title and a table of data.
 
     Args:
         title: The title of the section.
         grid: The grid of data to include in the section.
 
     Returns:
-        The HTML section as a string.
+        HTML section as a string.
     """
     return div(
         div(title, class_="title") + html_table_of(grid),
         class_="section",
     )
-
-
-# sample data ================================================================
-
-if __name__ == "__main__":
-    orb = Orb(
-        conjunction=2,
-        opposition=2,
-        trine=2,
-        square=2,
-        sextile=1,
-    )
-
-    mimi = Data(
-        name="MiMi",
-        city="Taipei",
-        dt="1980-04-20 14:30",
-        config=Config(theme_type="mono", orb=orb),
-    )
-
-    transit = Data(name="Transit", city="Taipei", dt="2024-01-01 13:30")
-
-    report = Report(mimi, transit)
-    fp = report.create_pdf(report.full_report)
-    with open("demo_report_mono.pdf", "wb") as f:
-        f.write(fp.getvalue())
-
-    mimi.config.theme_type = "light"
-    mimi.config.orb = Orb()
-    report.data2 = None
-    fp = report.create_pdf(report.full_report)
-    with open("demo_report_light.pdf", "wb") as f:
-        f.write(fp.getvalue())
