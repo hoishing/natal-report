@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "natal-report"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["Kelvin Ng <hoishing@gmail.com>"]
 readme = "README.md"
@@ -8,6 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 natal = "^0.8.14"
+weasyprint = "^63.1"
 
 
 [tool.poetry.group.dev.dependencies]
