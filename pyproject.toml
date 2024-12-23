@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "natal-report"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 authors = ["Kelvin Ng <hoishing@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-natal = "^0.8.14"
+natal = { git = "https://github.com/hoishing/natal.git", branch = "v0.9" }
 weasyprint = "^63.1"
 
 
