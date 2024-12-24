@@ -384,27 +384,20 @@ files = [
 
 [[package]]
 name = "natal"
-version = "0.9.0"
+version = "0.9.1"
 description = "create Natal Chart with ease"
 optional = false
-python-versions = "^3.12"
-files = []
-develop = false
+python-versions = "<4.0,>=3.12"
+files = [
+    {file = "natal-0.9.1-py3-none-any.whl", hash = "sha256:899ba78c55eb0e68009d31b5bfc2f2067d103b98a8a3dc806a62ab4a402bbdc1"},
+    {file = "natal-0.9.1.tar.gz", hash = "sha256:0639c9115f4350c844a8ce354938e6cd5e7fbbf98c92ec76ae04c279d5b77958"},
+]
 
 [package.dependencies]
-pydantic = "^2.8.2"
-pyswisseph = "^2.10.3.2"
-tabulate = "^0.9.0"
-tagit = "^0.6.1"
-
-[package.extras]
-report = []
-
-[package.source]
-type = "git"
-url = "https://github.com/hoishing/natal.git"
-reference = "v0.9"
-resolved_reference = "76af9e0ec48f2d26f275d2381e02c081f6deb68f"
+pydantic = ">=2.8.2,<3.0.0"
+pyswisseph = ">=2.10.3.2,<3.0.0.0"
+tabulate = ">=0.9.0,<0.10.0"
+tagit = ">=0.6.1,<0.7.0"
 
 [[package]]
 name = "packaging"
@@ -961,4 +954,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "1ce0c8780968d1948552fc9c01b71bb8864e8a87ffb84a37c5ef659c28f63f0a"
+content-hash = "0bdfc8e09860f964d6e628a9c27bc0f7d30c465d5ebd0794c63c4c2c2c83be6a"

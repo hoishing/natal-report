@@ -38,11 +38,11 @@ def test_basic_info(report):
     basic_info = report.basic_info
     assert basic_info[0] == ("name", "shing", "belle")
     assert basic_info[1] == (
-        "coordinates",
+        "location",
         "22.2783°N 114.175°E",
         "22.2783°N 114.175°E",
     )
-    assert basic_info[2][0] == "UTC birth time"
+    assert basic_info[2][0] == "UTC time"
     assert basic_info[2][1] == "1976-04-20 09:58", "2011-01-23 00:44"
 
 
