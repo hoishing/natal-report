@@ -12,11 +12,11 @@
     - refer weasyprint docs for installing OS dependencies
     - you may need to install [Pango] for text rendering
 
-`pip install "natal-report"`
+`pip install natal-report`
 
 or install as optional dependency of [Natal]:
 
-`pip install natal[report]`
+`pip install "natal[report]"`
 
 ## Usage
 
