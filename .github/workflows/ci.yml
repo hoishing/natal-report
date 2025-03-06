@@ -1,71 +1,68 @@
 name: CI
 
 on:
-    push:
-        branches:
-            - main
+  push:
+    branches:
+      - main
 
 jobs:
-    ci:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-            - uses: snok/install-poetry@v1
-              with:
-                  virtualenvs-create: true
-                  virtualenvs-in-project: true
-                  installer-parallel: true
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
-            - uses: actions/setup-python@v5
-              with:
-                  python-version: "3.12"
-                  cache: "poetry"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-            - run: |
-                  poetry install --with dev
-                  # avoid activate evn in every step
-                  echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
+      - run: |
+          uv sync
+          # avoid activate env in every step
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
 
-            - id: test
-              run: pytest
+      - id: test
+        run: pytest
 
-            - id: check_version
-              run: |
-                  pyproject_version=$(poetry version -s)
-                  repo_name="${GITHUB_REPOSITORY#*/}"
-                  latest_release=$(gh api repos/$GITHUB_REPOSITORY/releases/latest --jq .tag_name)
+      - id: check_version
+        run: |
+          pyproject_version=$(tomlq '.project.version' pyproject.toml)
+          repo_name="${GITHUB_REPOSITORY#*/}"
+          latest_release=$(gh api repos/$GITHUB_REPOSITORY/releases/latest --jq .tag_name)
 
-                  if [ "$(printf '%s\n' "$latest_release" "$pyproject_version" | sort -V | tail -n1)" = "$pyproject_version" ] && [ "$pyproject_version" != "$latest_release" ]; then
-                    echo "new_version=$pyproject_version" >> $GITHUB_OUTPUT
-                  fi
-              env:
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          if [ "$(printf '%s\n' "$latest_release" "$pyproject_version" | sort -V | tail -n1)" = "$pyproject_version" ] && [ "$pyproject_version" != "$latest_release" ]; then
+            echo "new_version=$pyproject_version" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            - id: build
-              if: steps.check_version.outputs.new_version != ''
-              run: poetry build
+      - id: build
+        if: steps.check_version.outputs.new_version != ''
+        run: uv build
 
-            - id: pump
-              if: steps.build.conclusion == 'success'
-              run: |
-                  git config --global user.email "hoishing@gmail.com"
-                  git config --global user.name "Kelvin Ng"
-                  git tag ${{ steps.check_version.outputs.new_version }}
-                  git push --tag -f
+      - id: pump
+        if: steps.build.conclusion == 'success'
+        run: |
+          git config --global user.email "hoishing@gmail.com"
+          git config --global user.name "Kelvin Ng"
+          git tag ${{ steps.check_version.outputs.new_version }}
+          git push --tag -f
 
-            - id: release
-              if: steps.pump.conclusion == 'success'
-              run: |
-                  latest_tag=${{ steps.check_version.outputs.new_version }}
-                  gh release create "$latest_tag" --generate-notes ./dist/*
-              env:
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - id: release
+        if: steps.pump.conclusion == 'success'
+        run: |
+          latest_tag=${{ steps.check_version.outputs.new_version }}
+          gh release create "$latest_tag" --generate-notes ./dist/*
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            - id: publish
-              if: steps.release.conclusion == 'success'
-              run: |
-                  poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
-                  poetry publish
+      - id: publish
+        if: (steps.release.conclusion == 'success') && ${{ !env.ACT }}
+        run: |
+          uv publish --token ${{ secrets.PYPI_API_TOKEN }}
