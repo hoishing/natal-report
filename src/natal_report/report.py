@@ -25,7 +25,7 @@ from natal.stats import StatData, dignity_of
 from pathlib import Path
 from tagit import div, main, style, svg, table, td, tr
 from typing import Iterable
-from weasyprint import HTML
+from xhtml2pdf import pisa
 
 type Grid = list[Iterable[str | int]]
 ELEMENTS = [ELEMENT_MEMBERS[i] for i in (0, 2, 3, 1)]
@@ -330,7 +330,7 @@ class Report:
             BytesIO object containing the PDF data.
         """
         fp = BytesIO()
-        HTML(string=html).write_pdf(fp)
+        pisa.CreatePDF(html, dest=fp)
         return fp
 
 

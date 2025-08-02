@@ -8,8 +8,8 @@
 
 - dependencies:
   - [Natal]: for natal chart data and SVG paths
-  - [weasyprint]: PDF generation
-    - refer weasyprint docs for installing OS dependencies
+  - [xhtml2pdf]: PDF generation
+    
     - you may need to install [Pango] for text rendering
 
 `pip install natal-report`
@@ -68,4 +68,4 @@ with open("demo_report_mono.pdf", "wb") as f:
 [Pango]: https://gitlab.gnome.org/GNOME/pango
 [pypi-badge]: https://img.shields.io/pypi/v/natal-report
 [pypi-url]: https://pypi.org/project/natal-report
-[weasyprint]: https://doc.courtbouillon.org/weasyprint/stable/
+[xhtml2pdf]: https://xhtml2pdf.readthedocs.io/en/latest/

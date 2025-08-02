@@ -5,7 +5,7 @@ description = "generate PDF report for the Natal package"
 requires-python = ">=3.12"
 dependencies = [
     "natal>=0.9.3",
-    "weasyprint>=64.1",
+    "xhtml2pdf>=0.2.16",
 ]
 readme = "README.md"
 
