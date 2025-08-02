@@ -1,0 +1,16 @@
+---
+alwaysApply: false
+---
+# Python Package Management
+
+- only use `uv` for managing virtual environment and package dependencies
+- use `uv init --python 3.12 && uv venv` to inititialize and create virtual environment
+- use `uv add` instead of `uv pip install` for installing packages
+- activate the environment with `source .venv/bin/activate` before running cli command installed by `uv add`
+- you can install and remove any packages if necessary
+- only use `uv` for managing virtual environment and package dependencies
+- use `uv init --python 3.12 && uv venv` to initialize and create virtual environment
+- use `uv add` and `uv remove` to add/remove packages
+- DO NOT use `uv pip install` and `uv pip uninstall` to add/remove packages
+- activate the environment with `source .venv/bin/activate` before running cli command installed by `uv add`
+- you can install and remove any packages if necessary
